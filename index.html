@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WLBA Store — Mini SPA</title>
+    <meta name="description"
+        content="E‑commerce SPA statis: Tailwind + Vanilla JS + ES Modules. Checkout via WhatsApp." />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        html {
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial;
+        }
+    </style>
+</head>
+
+<body class="bg-neutral-950 text-neutral-100">
+    <header
+        class="sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/70 border-b border-white/10">
+        <div class="max-w-full mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="#/" class="font-semibold tracking-tight">WLBA Store</a>
+            <nav class="flex items-center gap-1 text-sm">
+                <a data-link href="#/" data-route="/" class="px-3 py-2 rounded-xl hover:bg-white/10">Home</a>
+                <a data-link href="#/cart" data-route="/cart" class="relative px-3 py-2 rounded-xl hover:bg-white/10">
+                    Cart <span id="cartBadge"
+                        class="hidden ml-2 inline-flex items-center justify-center text-[10px] px-1.5 h-4 rounded bg-emerald-500/20 text-emerald-400"></span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <div class="mb-6 flex items-center gap-2 text-sm text-white/60">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>Static SPA • ES Modules • WhatsApp Checkout</span>
+        </div>
+        <div id="app" class="min-h-[60vh] opacity-0 transition-opacity duration-200"></div>
+    </main>
+
+
+    <footer class="border-t border-white/10 py-10">
+        <div class="max-w-6xl mx-auto px-4 text-xs text-white/60">© <span id="year"></span> <span id="shopName"></span>
+        </div>
+    </footer>
+
+
+    <!-- Entry: ES Modules -->
+    <script type="module" src="./js/app.js"></script>
+</body>
+
+</html>

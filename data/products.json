@@ -1,0 +1,42 @@
+[
+  {
+    "id": "wlf-tee-black",
+    "slug": "wlba-tee-black",
+    "title": "WLBA Tee – Black",
+    "price": 149000,
+    "image": "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=1600&auto=format&fit=crop",
+    "desc": "Kaos premium cotton combed 24s, cutting relaxed.",
+    "category": "T-Shirt",
+    "categorySlug": "t-shirt"
+  },
+  {
+    "id": "wlf-hoodie-sage",
+    "slug": "wlba-hoodie-sage",
+    "title": "WLBA Hoodie – Sage",
+    "price": 349000,
+    "image": "https://images.unsplash.com/photo-1618354691325-0a4c93b6cce9?q=80&w=1600&auto=format&fit=crop",
+    "desc": "Hoodie fleece medium weight, tone sage kalem.",
+    "category": "Hoodie",
+    "categorySlug": "hoodie"
+  },
+  {
+    "id": "wlf-cap-olive",
+    "slug": "wlba-cap-olive",
+    "title": "WLBA Cap – Olive",
+    "price": 99000,
+    "image": "https://images.unsplash.com/photo-1549032305-93d0f2f2b4cd?q=80&w=1600&auto=format&fit=crop",
+    "desc": "Topi 6-panel strapback, logo bordir minimalis.",
+    "category": "Accessories",
+    "categorySlug": "accessories"
+  },
+  {
+    "id": "wlf-tote-natural",
+    "slug": "wlba-tote-natural",
+    "title": "WLBA Tote – Natural",
+    "price": 79000,
+    "image": "https://images.unsplash.com/photo-1547949003-9792a18a2601?q=80&w=1600&auto=format&fit=crop",
+    "desc": "Tote bag canvas 12oz, muat laptop 13\".",
+    "category": "Bags",
+    "categorySlug": "bags"
+  }
+]
