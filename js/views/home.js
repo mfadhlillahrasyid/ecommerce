@@ -19,7 +19,7 @@ export function HomeView({ products, categories }) {
 ${categories
   .map(
     (c) =>
-      `<a class="px-3 py-1.5 rounded-xl text-sm bg-white/5 border border-white/10 hover:bg-white/10" href="#/c/${c.slug}">${c.name} <span class="text-white/40">(${c.count})</span></a>`
+      `<a class="px-3 py-1.5 rounded-xl text-sm bg-white/5 border border-white/10 hover:bg-white/10" href="/category/${c.slug}">${c.name} <span class="text-white/40">(${c.count})</span></a>`
   )
   .join("")}
 </div>
@@ -30,7 +30,7 @@ ${products
   .map(
     (p) => `
 <article class="group bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
-<a class="block" href="#/p/${p.slug}">
+<a class="block" href="/product/${p.slug}">
 <div class="aspect-square overflow-hidden bg-white/5">
 <img src="${p.image}" alt="${
       p.title
@@ -59,7 +59,7 @@ export function bindHome({ products }) {
       .map(
         (p) => `
 <article class="group bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
-<a class="block" href="#/p/${p.slug}">
+<a class="block" href="/product/${p.slug}">
 <div class="aspect-square overflow-hidden bg-white/5">
 <img src="${p.image}" alt="${
           p.title

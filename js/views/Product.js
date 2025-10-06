@@ -12,7 +12,7 @@ return `
 <div class="space-y-5">
 <div>
 <h1 class="text-2xl md:text-3xl font-bold">${p.title}</h1>
-<p class="text-white/70 mt-1">${fmtIDR(p.price)} • <a class="underline" href="#/c/${p.categorySlug}">${p.category}</a></p>
+<p class="text-white/70 mt-1">${fmtIDR(p.price)} • <a class="underline" href="/category/${p.categorySlug}">${p.category}</a></p>
 </div>
 <p class="text-white/70">${p.desc || ''}</p>
 
@@ -33,7 +33,7 @@ return `
 </div>
 
 
-<a href="#/" class="text-sm underline">← Kembali</a>
+<a href="/" class="text-sm underline">← Kembali</a>
 </div>
 </section>`;
 }
