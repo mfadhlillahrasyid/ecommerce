@@ -6,22 +6,16 @@ const BASE_NORM = (BASE ? "/" + BASE.replace(/^\/+/, "") : "").replace(
   ""
 );
 
-function stripBase(pathname) {
-  if (!BASE_NORM) return pathname || "/";
-  if (pathname === BASE_NORM) return "/";
-  if (pathname.startsWith(BASE_NORM + "/"))
-    return pathname.slice(BASE_NORM.length) || "/";
-  // di GH Pages, fallback 404.html tetap di bawah /ecommerce, jadi safe default:
-  return "/";
-}
-
 // Hash Router
 
 export function currentPath() {
   // "#/product/slug" -> "/product/slug"
   let s = location.hash ? location.hash.slice(1) : "/";
-  // toleransi: kalau "#/index.html" (dari live server), anggap root
+
+  // toleransi: live server/klik salah
   if (s === "/index.html" || s === "index.html") s = "/";
+  if (s === "/ecommerce" || s === "/ecommerce/") s = "/";
+
   if (!s.startsWith("/")) s = "/" + s;
   return s;
 }
@@ -31,12 +25,14 @@ export function navigate(path) {
   if (location.hash !== "#" + clean) location.hash = clean;
 }
 
-// intercept <a href="/..."> jadi hash (biar no full reload)
+// Intercept <a href="/..."> biar tidak reload penuh
 export function bindLinkInterceptor() {
   document.addEventListener("click", (e) => {
     const a = e.target.closest("a");
     if (!a) return;
     const href = a.getAttribute("href") || "";
+
+    // biarkan hash/mail/tel/external
     if (
       !href ||
       href.startsWith("#") ||
@@ -44,6 +40,15 @@ export function bindLinkInterceptor() {
       href.startsWith("tel:")
     )
       return;
+
+    // map absolut home ke hash home
+    if (href === "/ecommerce/" || href === "/" || href === "/index.html") {
+      e.preventDefault();
+      navigate("/");
+      return;
+    }
+
+    // absolut lain -> jadikan hash
     if (href.startsWith("/")) {
       e.preventDefault();
       navigate(href);
@@ -51,11 +56,10 @@ export function bindLinkInterceptor() {
   });
 }
 
-// live server buka "/index.html" → ubah ke "#/"
-export function migrateHistoryToHash(base = "") {
+// Kalau dibuka via /product/... (tanpa hash), ubah ke "#/..."
+export function migrateHistoryToHash() {
   if (location.hash) return;
   let p = location.pathname;
-  if (base && p.startsWith(base)) p = p.slice(base.length) || "/";
   if (p === "/index.html" || p === "/index.htm") p = "/";
   location.replace("#" + (p || "/"));
 }
