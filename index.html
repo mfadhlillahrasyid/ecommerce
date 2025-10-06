@@ -22,11 +22,31 @@
     <header
         class="sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/70 border-b border-white/10">
         <div class="max-w-full mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/" class="font-semibold tracking-tight">WLBA Store</a>
-            <nav class="flex items-center gap-1 text-sm">
-                <a data-link href="/" data-route="/" class="px-3 py-2 rounded-xl hover:bg-white/10">Home</a>
-                <a data-link href="/cart" data-route="/cart" class="relative px-3 py-2 rounded-xl hover:bg-white/10">
-                    Cart <span id="cartBadge"
+            <div class="flex gap-5 items-center">
+                <a href="/" class="font-semibold tracking-tight hidden sm:block">WORK LIFE BALANCE</a>
+                <a href="/" class="font-semibold tracking-tight sm:hidden block">WLB</a>
+                <nav class="flex items-center gap-1 text-sm">
+                    <a data-link href="#/home" data-route="/home"
+                        class="px-3 py-2 rounded-lg hover:bg-white/10">Home</a>
+                </nav>
+            </div>
+            <nav class="flex items-center gap-4 text-sm">
+                <div class="relative">
+                    <input id="searchInput" placeholder="Cari produk..."
+                        class="w-28 sm:w-72 max-w-full pl-9 pr-3 py-2 rounded-lg bg-white/5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20" />
+                    <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" viewBox="0 0 24 24"
+                        fill="none">
+                        <path d="m21 21-4.3-4.3" stroke="currentColor" stroke-width="1.5" />
+                        <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.5" />
+                    </svg>
+                </div>
+                <a data-link href="#/cart" data-route="/cart" class="relative px-3 py-2 rounded-lg hover:bg-white/10">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                    </svg>
+                    <span id="cartBadge"
                         class="hidden ml-2 inline-flex items-center justify-center text-[10px] px-1.5 h-4 rounded bg-emerald-500/20 text-emerald-400"></span>
                 </a>
             </nav>
@@ -34,12 +54,12 @@
     </header>
 
 
-    <main class="max-w-6xl mx-auto px-4 py-8">
+    <main class="max-w-[100rem] mx-auto px-4 py-8">
         <div class="mb-6 flex items-center gap-2 text-sm text-white/60">
             <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
             <span>Static SPA • ES Modules • WhatsApp Checkout</span>
         </div>
-        <div id="app" class="min-h-[60vh] opacity-0 transition-opacity duration-200"></div>
+        <div id="app" class="min-h-[80vh] opacity-0 transition-opacity duration-200"></div>
     </main>
 
 

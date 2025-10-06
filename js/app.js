@@ -1,10 +1,9 @@
-import { SHOP_NAME, WA_PHONE, DATA_URL } from "./config.js";
+import { SHOP_NAME, WA_PHONE, DATA_URL, HOME } from "./config.js";
 import { cartCount } from "./store/cart.js";
 import {
   currentPath,
-  navigate,
   bindLinkInterceptor,
-  migrateHashToHistory,
+  migrateHistoryToHash,
 } from "./router.js";
 import { HomeView, bindHome } from "./views/home.js";
 import { CategoryView } from "./views/Category.js";
@@ -100,123 +99,255 @@ function bumpCart() {
 }
 
 function normalizeLegacy(path) {
-  // Alias lama → baru
+  if (path === "/") {
+    location.replace("#" + HOME);
+    return true;
+  }
   if (path.startsWith("/p/")) {
-    const rest = path.slice(3); // setelah "/p/"
-    navigate("/product/" + rest);
+    location.replace("#/product/" + path.slice(3));
     return true;
   }
   if (path.startsWith("/c/")) {
-    const rest = path.slice(3);
-    navigate("/category/" + rest);
+    location.replace("#/category/" + path.slice(3));
     return true;
   }
   return false;
 }
 
+function ensure(selector, create) {
+  let el = document.querySelector(selector);
+  if (!el && create) {
+    el = create();
+    document.head.appendChild(el);
+  }
+  return el;
+}
+
 function setMeta({ title, desc, canonical }) {
   // <title>
-  document.title = title ? `${title} · ${SHOP_NAME}` : SHOP_NAME;
+  document.title = title ? `${title} | ${SHOP_NAME}` : SHOP_NAME;
 
   // <meta name="description">
-  let md = document.querySelector('meta[name="description"]');
-  if (!md) {
-    md = document.createElement("meta");
-    md.setAttribute("name", "description");
-    document.head.appendChild(md);
-  }
+  const md = ensure('meta[name="description"]', () => {
+    const m = document.createElement("meta");
+    m.setAttribute("name", "description");
+    return m;
+  });
   md.setAttribute(
     "content",
-    (desc || "Katalog WLBA. WhatsApp checkout.").slice(0, 160)
+    (desc || "Work Life Balance adalah brand clothing lokal. Temukan koleksi t-shirt & hoodie premium untuk daily fit. Ready stock, WA checkout.").slice(0, 160)
   );
 
-  // <link rel="canonical">
-  let lc = document.querySelector('link[rel="canonical"]');
-  if (!lc) {
-    lc = document.createElement("link");
-    lc.rel = "canonical";
-    document.head.appendChild(lc);
-  }
-  // Karena pakai hash routing, canonical ikut hash
-  lc.href =
-    location.origin + location.pathname + (canonical || location.hash || "#/");
+  // <link rel="canonical"> — karena hash router, canonical ikut hash
+  const lc = ensure('link[rel="canonical"]', () => {
+    const l = document.createElement("link");
+    l.setAttribute("rel", "canonical");
+    return l;
+  });
+  lc.setAttribute(
+    "href",
+    location.origin + location.pathname + (canonical || location.hash || "#/")
+  );
 }
 
 function setOG({ title, desc, url, image }) {
-  const ensure = (name, attr = "property") => {
-    let m = document.querySelector(`meta[${attr}="${name}"]`);
-    if (!m) {
-      m = document.createElement("meta");
+  const ensureOG = (name, attr = "property") =>
+    ensure(`meta[${attr}="${name}"]`, () => {
+      const m = document.createElement("meta");
       m.setAttribute(attr, name);
-      document.head.appendChild(m);
-    }
-    return m;
-  };
-  ensure("og:title").setAttribute("content", title || document.title);
-  ensure("og:description").setAttribute("content", (desc || "").slice(0, 160));
-  ensure("og:type").setAttribute("content", "website");
-  ensure("og:url").setAttribute("content", url || location.href);
-  if (image) ensure("og:image").setAttribute("content", image);
-
-  ensure("twitter:card", "name").setAttribute(
-    "content",
-    image ? "summary_large_image" : "summary"
-  );
-  ensure("twitter:title", "name").setAttribute(
-    "content",
-    title || document.title
-  );
-  ensure("twitter:description", "name").setAttribute(
+      return m;
+    });
+  ensureOG("og:title").setAttribute("content", title || document.title);
+  ensureOG("og:description").setAttribute(
     "content",
     (desc || "").slice(0, 160)
   );
-  if (image) ensure("twitter:image", "name").setAttribute("content", image);
+  ensureOG("og:type").setAttribute("content", "website");
+  ensureOG("og:url").setAttribute("content", url || location.href);
+  if (image) ensureOG("og:image").setAttribute("content", image);
+
+  const ensureTw = (name) => ensureOG(name, "name");
+  ensureTw("twitter:card").setAttribute(
+    "content",
+    image ? "summary_large_image" : "summary"
+  );
+  ensureTw("twitter:title").setAttribute("content", title || document.title);
+  ensureTw("twitter:description").setAttribute(
+    "content",
+    (desc || "").slice(0, 160)
+  );
+  if (image) ensureTw("twitter:image").setAttribute("content", image);
+}
+
+// JSON-LD Product
+function setLDProduct(p) {
+  let s = document.getElementById("ld-product");
+  if (!s) {
+    s = document.createElement("script");
+    s.id = "ld-product";
+    s.type = "application/ld+json";
+    document.head.appendChild(s);
+  }
+  const ld = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    name: p.title,
+    image: [p.image].filter(Boolean),
+    description: p.desc || p.title,
+    brand: { "@type": "Brand", name: SHOP_NAME },
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "IDR",
+      price: String(p.price),
+      availability: "https://schema.org/InStock",
+      url: location.href,
+    },
+  };
+  s.textContent = JSON.stringify(ld);
+}
+function clearLDProduct() {
+  const s = document.getElementById("ld-product");
+  if (s) s.remove();
 }
 
 function render() {
-  const path = currentPath();
+  const path = currentPath(); // dari router hash kamu
   if (normalizeLegacy(path)) return;
 
-  setActive(path);
+  setActive?.(path); // kalau kamu punya setActive
 
-  if (path === "/") {
-    // setMeta / setOG optional
-    fadeSwap(HomeView({ products: PRODUCTS, categories: CATEGORIES }), () =>
-      bindHome({ products: PRODUCTS })
+  if (path === HOME) {
+    setMeta({
+      title: "Home",
+      desc: "Work Life Balance adalah brand clothing lokal. Temukan koleksi t-shirt & hoodie premium untuk daily fit. Ready stock, WA checkout.",
+      canonical: "#/",
+    });
+    setOG({
+      title: `${SHOP_NAME} — Catalog`,
+      desc: "Streetwear, WA checkout",
+      url: location.href,
+    });
+    clearLDProduct();
+
+    return fadeSwap(
+      HomeView({ products: PRODUCTS, categories: CATEGORIES }),
+      () => bindHome({ products: PRODUCTS })
     );
-  } else if (path.startsWith("/category/")) {
-    const slug = path.replace("/category/", "");
-    const cat = CATEGORIES.find((c) => c.slug === slug);
-    if (!cat) return fadeSwap(notFound("Kategori tidak ditemukan"));
-    fadeSwap(CategoryView({ slug, name: cat.name, products: PRODUCTS }));
-  } else if (path.startsWith("/product/")) {
-    const slug = path.replace("/product/", "");
-    const p = PRODUCTS.find((x) => x.slug === slug);
-    if (!p) return fadeSwap(notFound("Produk tidak ditemukan"));
-    fadeSwap(ProductView({ p, waPhone: WA_PHONE, shopName: SHOP_NAME }), () =>
-      bindProduct({ p })
-    );
-  } else if (path === "/cart") {
-    fadeSwap(
-      CartView({ products: PRODUCTS, shopName: SHOP_NAME, waPhone: WA_PHONE }),
-      () => bindCart()
-    );
-  } else {
-    fadeSwap(notFound("Halaman tidak ditemukan"));
   }
 
-  bumpCart();
+  if (path === "/cart") {
+    setMeta({
+      title: "Cart",
+      desc: `Keranjang belanja ${SHOP_NAME}`,
+      canonical: "#/cart",
+    });
+    setOG({
+      title: `Cart — ${SHOP_NAME}`,
+      desc: "Review pesanan sebelum checkout",
+      url: location.href,
+    });
+    clearLDProduct();
+
+    return fadeSwap(
+      CartView({ products: PRODUCTS, shopName: SHOP_NAME, waPhone: WA_PHONE }),
+      () =>
+        bindCart({ products: PRODUCTS, shopName: SHOP_NAME, waPhone: WA_PHONE })
+    );
+  }
+
+  if (path.startsWith("/category/")) {
+    const slug = decodeURIComponent(path.replace("/category/", ""));
+    const cat = CATEGORIES.find((c) => c.slug === slug);
+    if (!cat) {
+      setMeta({ title: "404", canonical: location.hash });
+      setOG({
+        title: "404",
+        desc: "Kategori tidak ditemukan",
+        url: location.href,
+      });
+      clearLDProduct();
+      return fadeSwap(notFound("Kategori tidak ditemukan"));
+    }
+
+    setMeta({
+      title: `Kategori: ${cat.name}`,
+      desc: `Belanja ${cat.name} dari ${SHOP_NAME}.`,
+      canonical: `#/category/${cat.slug}`,
+    });
+    setOG({
+      title: `${cat.name} — ${SHOP_NAME}`,
+      desc: `Koleksi ${cat.name}`,
+      url: location.href,
+    });
+    clearLDProduct();
+
+    return fadeSwap(CategoryView({ slug, name: cat.name, products: PRODUCTS }));
+  }
+
+  if (path.startsWith("/product/")) {
+    const slug = decodeURIComponent(path.replace("/product/", ""));
+    const p = PRODUCTS.find((x) => x.slug === slug);
+    if (!p) {
+      setMeta({ title: "404", canonical: location.hash });
+      setOG({
+        title: "404",
+        desc: "Produk tidak ditemukan",
+        url: location.href,
+      });
+      clearLDProduct();
+      return fadeSwap(notFound("Produk tidak ditemukan"));
+    }
+
+    setMeta({
+      title: p.title,
+      desc: p.desc || `${p.title} — ${SHOP_NAME}`,
+      canonical: `#/product/${p.slug}`,
+    });
+    setOG({
+      title: p.title,
+      desc: p.desc || p.title,
+      url: location.href,
+      image: p.image,
+    });
+    setLDProduct(p);
+
+    return fadeSwap(
+      ProductView({ p, waPhone: WA_PHONE, shopName: SHOP_NAME }),
+      () => bindProduct({ p })
+    );
+  }
+
+  setMeta({
+    title: "404",
+    desc: "Halaman tidak ditemukan.",
+    canonical: location.hash || "#/",
+  });
+  setOG({ title: "404", desc: "Halaman tidak ditemukan.", url: location.href });
+  clearLDProduct();
+  return fadeSwap(notFound("Halaman tidak ditemukan"));
 }
 
 function notFound(msg) {
   return `<section class='space-y-3'><h1 class='text-3xl font-bold'>404</h1><p class='text-white/70'>${msg}</p><a href='/' class='underline' data-external>Home</a></section>`;
 }
 
-window.addEventListener("popstate", render);
+bumpCart();
+
+window.addEventListener("hashchange", render);
 bindLinkInterceptor();
-migrateHashToHistory();
+migrateHistoryToHash("");
 
 (async function start() {
+  // kalau belum ada hash, langsung ke home baru
+  if (!location.hash) location.replace("#" + HOME);
+  // kalau kebetulan #/index.html dari Live Server → anggap root → redirect ke HOME
+  if (
+    location.hash === "#/index.html" ||
+    location.hash === "#index.html" ||
+    location.hash === "#/"
+  ) {
+    location.replace("#" + HOME);
+  }
   await loadProducts();
   render();
 })();

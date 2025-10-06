@@ -1,28 +1,36 @@
-const KEY = 'mini-spa-cart-v3';
-
+const KEY = 'cart-json-shop';
 
 export const getCart = () => JSON.parse(localStorage.getItem(KEY) || '[]');
-export const setCart = (items) => localStorage.setItem(KEY, JSON.stringify(items));
-export const cartCount = () => getCart().reduce((a, i) => a + i.qty, 0);
-
+const setCart = (arr) => {
+  localStorage.setItem(KEY, JSON.stringify(arr));
+  // emit event biar header update
+  window.dispatchEvent(new CustomEvent('cart:changed', { detail: { count: cartCount() } }));
+};
 
 export function addItem(id, qty = 1) {
-const items = getCart();
-const idx = items.findIndex(i => i.id === id);
-if (idx > -1) items[idx].qty += qty; else items.push({ id, qty });
-setCart(items);
+  const k = String(id);
+  const arr = getCart();
+  const i = arr.findIndex(x => String(x.id) === k);
+  if (i > -1) arr[i].qty += qty;
+  else arr.push({ id, qty });
+  setCart(arr);
 }
-
 
 export function updateQty(id, qty) {
-const items = getCart();
-const idx = items.findIndex(i => i.id === id);
-if (idx > -1) {
-items[idx].qty = Math.max(1, qty|0);
-setCart(items);
-}
+  const k = String(id);
+  const arr = getCart();
+  const i = arr.findIndex(x => String(x.id) === k);
+  if (i > -1) { arr[i].qty = Math.max(1, qty | 0); setCart(arr); }
 }
 
+export function removeItem(id) {
+  const k = String(id);
+  setCart(getCart().filter(x => String(x.id) !== k));
+}
 
-export function removeItem(id) { setCart(getCart().filter(i => i.id !== id)); }
 export function clearCart() { setCart([]); }
+
+// <-- ini yang wajib buat nge-fix error import
+export function cartCount() {
+  return getCart().reduce((sum, it) => sum + (it.qty | 0), 0);
+}
